@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script type="module">
+      import Zip from './zip.js'
+      const zip = new Zip()
+      const blob = new Blob(['hello world'], { type: 'text/plain' })
+      await zip.addFile('one.txt', blob)
+      const blob2 = new Blob(['zipped'], { type: 'text/plain' })
+      await zip.addFile('two.txt', blob2)
+      const zipBlob = await zip.write()
+      console.log(await zipBlob.arrayBuffer())
+      const href = URL.createObjectURL(zipBlob)
+      const a = document.createElement('a')
+      a.setAttribute('href', href)
+      a.setAttribute('download', 'test.zip')
+      a.click()
+      URL.revokeObjectURL(href)
+    </script>
+  </head>
+  <body>
+    <h1>MinZip</h1>
+  </body>
+</html>
