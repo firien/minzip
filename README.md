@@ -13,6 +13,15 @@ Required APIs
 * Response
 * Blob
 
+Example
+```js
+import MinZip from 'minzip'
+const zip = new MinZip()
+const blob = new Blob(['hello world'], { type: 'text/plain' })
+await zip.addFile('one.txt', blob)
+const zipBlob = await zip.write()
+```
+
 ## Caveats
 
 Very new and untested. Files seem very straight forward, but the Folders are a little fuzzy at this point.
@@ -23,6 +32,3 @@ Very new and untested. Files seem very straight forward, but the Folders are a l
 * https://en.wikipedia.org/wiki/Gzip
 * https://www.rfc-editor.org/rfc/rfc1952
 
-
-npx esbuild ./index.js --bundle --format=esm --minify | wc -c
-npx esbuild ./index.js --bundle --format=esm --minify --mangle-props='(Size|Method|Offset|Record|Data|Header|Word)$' | wc -c
