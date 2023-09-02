@@ -40,6 +40,10 @@ class Entry {
     return file
   }
 
+  /**
+   * Generate localFileHeader
+   * @return {Blob}
+   */
   localFileHeader () {
     const buffer = new ArrayBuffer(this.constructor.#localFileHeaderLength)
     const dv = new DataView(buffer)
@@ -51,6 +55,10 @@ class Entry {
     return new Blob([buffer, this.encodedName])
   }
 
+  /**
+   * Generate centralDirectoryFileHeader
+   * @return {Blob}
+   */
   centralDirectoryFileHeader () {
     const buffer = new ArrayBuffer(this.constructor.#centralDirectoryFileHeaderLength)
     const dv = new DataView(buffer)
@@ -100,12 +108,23 @@ export default class {
     this.entries = []
   }
 
+  /**
+   * Add file to zip
+   * @param {string} name name of file
+   * @param {Blob} blob data
+   * @return {Entry}
+   */
   async addFile (name, blob) {
     const file = await Entry.addFile(name, blob)
     this.entries.push(file)
     return file
   }
 
+  /**
+   * Add folder to zip
+   * @param {string} name name of folder
+   * @return {Entry}
+   */
   async addFolder (name) {
     const folder = Entry.addFolder(name)
     this.entries.push(folder)
@@ -120,6 +139,10 @@ export default class {
     return Object.assign(folder, scope)
   }
 
+  /**
+   * Generate endOfCentralDirectoryRecord
+   * @return {ArrayBuffer}
+   */
   endOfCentralDirectoryRecord () {
     const buffer = new ArrayBuffer(this.constructor.#endOfCentralDirectoryRecordLength)
     const dv = new DataView(buffer)
@@ -134,7 +157,11 @@ export default class {
     return buffer
   }
 
-  //
+  /**
+   * Get the zip blob
+   * @param {boolean} [purge=true] remove compressed data after write
+   * @return {Promise} Resolves to zip blob
+   */
   async write (purge = true) {
     const blobs = []
     let totalBytes = 0

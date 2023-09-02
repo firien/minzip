@@ -1,5 +1,8 @@
 # MinZip
 
+![node test](https://github.com/firien/minzip/actions/workflows/node.js.yml/badge.svg?event=push)
+![browser test](https://github.com/firien/minzip/actions/workflows/playwright.yml/badge.svg?event=push)
+
 Minimalistic zip file generator using native APIs. Minified code is ~3kb.
 
 Works in browsers (Chrome >80, Firefox >113, Safari >16.4) and node (> v18)
@@ -24,7 +27,7 @@ const zipBlob = await zip.write()
 
 ## Caveats
 
-Very new and untested. Files seem very straight forward, but the Folders are a little fuzzy at this point.
+Very new and relatively untested. Files seem very straight forward, but the Folders are a little fuzzy at this point.
 
 ## Resources
 
