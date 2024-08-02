@@ -197,6 +197,24 @@ export default class {
   }
 }
 
+/**
+* Generate endOfCentralDirectoryRecord
+* @return {ArrayBuffer}
+*/
+const endOfCentralDirectoryRecord = (entriesCount, size, offset) => {
+  const buffer = new ArrayBuffer(22)
+  const dv = new DataView(buffer)
+  dv.setUint32(0, 0x06054b50, true) // End of central directory signature
+  dv.setUint16(4, 0) // Number of this disk
+  dv.setUint16(6, 0) // Disk where central directory starts
+  dv.setUint16(8, entriesCount, true) // Number of central directory records on this disk
+  dv.setUint16(10, entriesCount, true) // Total number of central directory records
+  dv.setUint32(12, size, true) // Size of central directory
+  dv.setUint32(16, offset, true) // Offset of start of central directory
+  dv.setUint16(20, 0) // Comment length
+  return buffer
+}
+
 export class ZipStream {
   constructor (file) {
     this.zip = createWriteStream(file)
@@ -279,37 +297,19 @@ export class ZipStream {
 
   async close () {
     // write central directories
+    const centralDirectoryOffset = this.zip.bytesWritten
     for (const entry of this.entries) {
-      this.centralDirectoryOffset = this.zip.bytesWritten
       const aa = await entry.centralDirectoryFileHeader().arrayBuffer()
       const ab = new Uint8Array(aa)
       await new Promise((resolve, reject) => {
         this.zip.write(ab, resolve)
       })
     }
-    this.centralDirectorySize = this.zip.bytesWritten - this.centralDirectoryOffset
+    const centralDirectorySize = this.zip.bytesWritten - centralDirectoryOffset
     await new Promise((resolve, reject) => {
-      const bb = new Uint8Array(this.endOfCentralDirectoryRecord())
+      const bb = new Uint8Array(endOfCentralDirectoryRecord(this.entries.length, centralDirectorySize, centralDirectoryOffset))
       this.zip.write(bb, resolve)
     })
     this.zip.close()
-  }
-
-  /**
-   * Generate endOfCentralDirectoryRecord
-   * @return {ArrayBuffer}
-   */
-  endOfCentralDirectoryRecord () {
-    const buffer = new ArrayBuffer(22)
-    const dv = new DataView(buffer)
-    dv.setUint32(0, 0x06054b50, true) // End of central directory signature
-    dv.setUint16(4, 0) // Number of this disk
-    dv.setUint16(6, 0) // Disk where central directory starts
-    dv.setUint16(8, this.entries.length, true) // Number of central directory records on this disk
-    dv.setUint16(10, this.entries.length, true) // Total number of central directory records
-    dv.setUint32(12, this.centralDirectorySize, true) // Size of central directory
-    dv.setUint32(16, this.centralDirectoryOffset, true) // Offset of start of central directory
-    dv.setUint16(20, 0) // Comment length
-    return buffer
   }
 }
