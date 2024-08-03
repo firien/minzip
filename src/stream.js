@@ -1,11 +1,48 @@
-import { createReadStream, createWriteStream, statSync } from 'node:fs'
+import { createReadStream, createWriteStream, statSync, existsSync } from 'node:fs'
+import { readdir } from 'node:fs/promises'
 import { ReadableStream } from 'node:stream/web'
+import { resolve, join, dirname } from 'node:path'
 import { Entry, endOfCentralDirectoryRecord } from './zip.js'
 
 export default class ZipStream {
   constructor (file) {
     this.zip = createWriteStream(file)
     this.entries = []
+  }
+
+  async addFolder (dir) {
+    if (existsSync(dir)) {
+      const stats = statSync(dir)
+      if (stats.isDirectory()) {
+        const folder = new Entry()
+        folder.timeStamp = stats.mtime ?? new Date()
+        folder.uncompressedByteSize = 0
+        folder.compressedByteSize = 0
+        folder.crc32 = 0
+        folder.compressionMethod = 0
+        folder.localFileHeaderOffset = this.zip.bytesWritten
+        folder.externalFileAttributes = 0x0000ED41
+        const utf8Encode = new TextEncoder()
+        folder.encodedName = utf8Encode.encode(`${dir}/`)
+        // write folder
+        const localFileHeader = folder.localFileHeader()
+        const aa = await localFileHeader.arrayBuffer()
+        const ab = new Uint8Array(aa)
+        await new Promise((resolve, reject) => {
+          this.zip.write(ab, resolve)
+        })
+        this.entries.push(folder)
+        const files = await readdir(dir, { withFileTypes: true })
+        for (const file of files) {
+          const path = join(file.path, file.name)
+          if (file.isDirectory()) {
+            await this.addFolder(path)
+          } else {
+            await this.addFile(path)
+          }
+        }
+      }
+    }
   }
 
   async addFile (path) {
