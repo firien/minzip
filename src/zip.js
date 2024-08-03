@@ -44,7 +44,7 @@ export class Entry {
    * Generate localFileHeader
    * @return {Blob}
    */
-  localFileHeader ({ stream = false }) {
+  localFileHeader ({ stream = false } = {}) {
     const buffer = new ArrayBuffer(this.constructor.#localFileHeaderLength)
     const dv = new DataView(buffer)
     dv.setUint32(0, 0x04034b50, true) // Local file header signature
