@@ -26,8 +26,8 @@ test('zip me up', async () => {
 
 test('zip with folder', async () => {
   const zip = new MinZip()
-  const folder = await zip.addFolder('test')
-  const folder2 = await folder.addFolder('ext')
+  const folder = zip.addFolder('test')
+  const folder2 = folder.addFolder('ext')
 
   const blob2 = new Blob(['zipped'], { type: 'text/plain' })
   await folder2.addFile('two.txt', blob2)
