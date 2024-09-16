@@ -125,7 +125,7 @@ export default class {
    * @param {string} name name of folder
    * @return {Entry}
    */
-  async addFolder (name) {
+  addFolder (name) {
     const folder = Entry.addFolder(name)
     this.entries.push(folder)
     const scope = {
