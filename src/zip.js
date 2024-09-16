@@ -65,7 +65,7 @@ class Entry {
     dv.setUint32(0, 0x02014b50, true) // Central directory file header signature
     dv.setUint16(4, 0x1404) // Version made by
     dv.setUint16(6, 0x1400) // Version needed to extract (minimum)
-    dv.setUint16(8, 0) // General purpose bit flag
+    dv.setUint16(8, 0b0000100000000000) // General purpose bit flag
     this.commonHeaders(dv, 10)
     dv.setUint16(30, 0, true) // Extra field length
     dv.setUint16(32, 0, true) // File comment length
@@ -83,7 +83,7 @@ class Entry {
     dv.setUint32(offsetStart + 6, this.crc32) // CRC-32 of uncompressed data
     dv.setUint32(offsetStart + 10, this.compressedByteSize, true) // Compressed size
     dv.setUint32(offsetStart + 14, this.uncompressedByteSize, true) // Uncompressed size
-    dv.setUint16(offsetStart + 18, this.name.length, true) // File name length
+    dv.setUint16(offsetStart + 18, this.encodedName.length, true) // File name length
   }
 
   get dateWord () {
