@@ -49,7 +49,7 @@ class Entry {
     const dv = new DataView(buffer)
     dv.setUint32(0, 0x04034b50, true) // Local file header signature
     dv.setUint16(4, 0x1400) // Version needed to extract (minimum)
-    dv.setUint16(6, 0) // General purpose bit flag
+    dv.setUint16(6, 0b100000000000, true) // General purpose bit flag
     this.commonHeaders(dv, 8)
     dv.setUint16(28, 0, true) // Extra field length
     return new Blob([buffer, this.encodedName])
@@ -65,7 +65,7 @@ class Entry {
     dv.setUint32(0, 0x02014b50, true) // Central directory file header signature
     dv.setUint16(4, 0x1404) // Version made by
     dv.setUint16(6, 0x1400) // Version needed to extract (minimum)
-    dv.setUint16(8, 0b0000100000000000) // General purpose bit flag
+    dv.setUint16(8, 0b100000000000, true) // General purpose bit flag
     this.commonHeaders(dv, 10)
     dv.setUint16(30, 0, true) // Extra field length
     dv.setUint16(32, 0, true) // File comment length
