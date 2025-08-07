@@ -147,8 +147,8 @@ export default class {
     const buffer = new ArrayBuffer(this.constructor.#endOfCentralDirectoryRecordLength)
     const dv = new DataView(buffer)
     dv.setUint32(0, 0x06054b50, true) // End of central directory signature
-    dv.setUint16(4, 0) // Number of this disk
-    dv.setUint16(6, 0) // Disk where central directory starts
+    dv.setUint16(4, 0, true) // Number of this disk
+    dv.setUint16(6, 0, true) // Disk where central directory starts
     dv.setUint16(8, this.entries.length, true) // Number of central directory records on this disk
     dv.setUint16(10, this.entries.length, true) // Total number of central directory records
     dv.setUint32(12, this.centralDirectorySize, true) // Size of central directory
