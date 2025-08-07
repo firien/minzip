@@ -1,8 +1,8 @@
-import { test, expect } from '@playwright/test'
-import testConfig from '../../playwright.config.js'
-import { join } from 'node:path'
-import { tmpdir } from 'node:os'
 import { execSync } from 'node:child_process'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { expect, test } from '@playwright/test'
+import testConfig from '../../playwright.config.js'
 
 test('download zip', async ({ page }) => {
   await page.goto(`http://localhost:${testConfig.webServer.port}/`)
