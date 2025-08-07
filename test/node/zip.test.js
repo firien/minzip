@@ -35,5 +35,6 @@ test('zip with folder', async () => {
   const zipBlob = await zip.write()
   const buffer = await zipBlob.arrayBuffer()
   const dv = new DataView(buffer)
-  writeFileSync('/tmp/tast.zip', dv)
+  const zipFile = join(tmpdir(), 'tast.zip')
+  writeFileSync(zipFile, dv)
 })

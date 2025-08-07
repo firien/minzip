@@ -1,4 +1,4 @@
-class Entry {
+export class Entry {
   static #localFileHeaderLength = 30
   static #centralDirectoryFileHeaderLength = 46
 
@@ -44,12 +44,16 @@ class Entry {
    * Generate localFileHeader
    * @return {Blob}
    */
-  localFileHeader () {
+  localFileHeader ({ stream = false } = {}) {
     const buffer = new ArrayBuffer(this.constructor.#localFileHeaderLength)
     const dv = new DataView(buffer)
     dv.setUint32(0, 0x04034b50, true) // Local file header signature
     dv.setUint16(4, 0x1400) // Version needed to extract (minimum)
-    dv.setUint16(6, 0b100000000000, true) // General purpose bit flag
+    let genFlag = 0b100000000000
+    if (stream) {
+      genFlag |= 0b1000
+    }
+    dv.setUint16(6, genFlag, true) // General purpose bit flag
     this.commonHeaders(dv, 8)
     dv.setUint16(28, 0, true) // Extra field length
     return new Blob([buffer, this.encodedName])
@@ -189,4 +193,22 @@ export default class {
     blobs.push(this.endOfCentralDirectoryRecord())
     return new Blob(blobs, { type: 'application/zip' })
   }
+}
+
+/**
+* Generate endOfCentralDirectoryRecord
+* @return {ArrayBuffer}
+*/
+export const endOfCentralDirectoryRecord = (entriesCount, size, offset) => {
+  const buffer = new ArrayBuffer(22)
+  const dv = new DataView(buffer)
+  dv.setUint32(0, 0x06054b50, true) // End of central directory signature
+  dv.setUint16(4, 0) // Number of this disk
+  dv.setUint16(6, 0) // Disk where central directory starts
+  dv.setUint16(8, entriesCount, true) // Number of central directory records on this disk
+  dv.setUint16(10, entriesCount, true) // Total number of central directory records
+  dv.setUint32(12, size, true) // Size of central directory
+  dv.setUint32(16, offset, true) // Offset of start of central directory
+  dv.setUint16(20, 0) // Comment length
+  return buffer
 }
