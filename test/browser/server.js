@@ -1,6 +1,6 @@
-import { existsSync, statSync, createReadStream } from 'node:fs'
-import { join } from 'node:path'
+import { createReadStream, existsSync, statSync } from 'node:fs'
 import { createServer } from 'node:http'
+import { join } from 'node:path'
 
 createServer((request, response) => {
   const uri = request.url
@@ -13,21 +13,21 @@ createServer((request, response) => {
         const stat = statSync(filePath)
         response.writeHead(200, {
           'Content-Type': 'text/html',
-          'Content-Length': stat.size
+          'Content-Length': stat.size,
         })
         const readStream = createReadStream(filePath)
         readStream.pipe(response)
       } else {
         const stat = statSync(filePath)
         let mime
-        if ((/js$/).test(filePath)) {
+        if (/js$/.test(filePath)) {
           mime = 'text/javascript'
         } else {
           mime = 'text/plain'
         }
         response.writeHead(200, {
           'Content-Type': mime,
-          'Content-Length': stat.size
+          'Content-Length': stat.size,
         })
         const readStream = createReadStream(filePath)
         readStream.pipe(response)

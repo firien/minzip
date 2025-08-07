@@ -2,7 +2,7 @@ class Entry {
   static #localFileHeaderLength = 30
   static #centralDirectoryFileHeaderLength = 46
 
-  static addFolder (name) {
+  static addFolder(name) {
     const folder = new Entry()
     folder.timeStamp = new Date()
     folder.name = `${name}/`
@@ -10,13 +10,13 @@ class Entry {
     folder.compressedByteSize = 0
     folder.crc32 = 0
     folder.compressionMethod = 0
-    folder.externalFileAttributes = 0x0000ED41
+    folder.externalFileAttributes = 0x0000ed41
     const utf8Encode = new TextEncoder()
     folder.encodedName = utf8Encode.encode(folder.name)
     return folder
   }
 
-  static async addFile (name, blob) {
+  static async addFile(name, blob) {
     const file = new Entry()
     file.timeStamp = new Date()
     file.name = name
@@ -29,12 +29,19 @@ class Entry {
     const trailingBytes = 8
     file.compressedByteSize = buffer.byteLength - headerBytes - trailingBytes
     file.compressionMethod = 0x0800
-    file.externalFileAttributes = 0x0000A481
-    const dataView = new DataView(buffer, buffer.byteLength - trailingBytes, trailingBytes)
+    file.externalFileAttributes = 0x0000a481
+    const dataView = new DataView(
+      buffer,
+      buffer.byteLength - trailingBytes,
+      trailingBytes,
+    )
     // extract crc32 checksum
     file.crc32 = dataView.getUint32(0)
     // dataView.getUint32(4, true) also uncompressedByteSize
-    file.compressedData = buffer.slice(headerBytes, buffer.byteLength - trailingBytes)
+    file.compressedData = buffer.slice(
+      headerBytes,
+      buffer.byteLength - trailingBytes,
+    )
     const utf8Encode = new TextEncoder()
     file.encodedName = utf8Encode.encode(file.name)
     return file
@@ -44,7 +51,7 @@ class Entry {
    * Generate localFileHeader
    * @return {Blob}
    */
-  localFileHeader () {
+  localFileHeader() {
     const buffer = new ArrayBuffer(this.constructor.#localFileHeaderLength)
     const dv = new DataView(buffer)
     dv.setUint32(0, 0x04034b50, true) // Local file header signature
@@ -59,8 +66,10 @@ class Entry {
    * Generate centralDirectoryFileHeader
    * @return {Blob}
    */
-  centralDirectoryFileHeader () {
-    const buffer = new ArrayBuffer(this.constructor.#centralDirectoryFileHeaderLength)
+  centralDirectoryFileHeader() {
+    const buffer = new ArrayBuffer(
+      this.constructor.#centralDirectoryFileHeaderLength,
+    )
     const dv = new DataView(buffer)
     dv.setUint32(0, 0x02014b50, true) // Central directory file header signature
     dv.setUint16(4, 0x1404) // Version made by
@@ -76,7 +85,7 @@ class Entry {
     return new Blob([buffer, this.encodedName])
   }
 
-  commonHeaders (dv, offsetStart) {
+  commonHeaders(dv, offsetStart) {
     dv.setUint16(offsetStart, this.compressionMethod) // Compression method
     dv.setUint16(offsetStart + 2, this.timeWord, true) // File last modification time
     dv.setUint16(offsetStart + 4, this.dateWord, true) // File last modification date
@@ -86,14 +95,14 @@ class Entry {
     dv.setUint16(offsetStart + 18, this.encodedName.length, true) // File name length
   }
 
-  get dateWord () {
+  get dateWord() {
     const year = this.timeStamp.getFullYear() - 1980
     const month = this.timeStamp.getMonth() + 1
     const day = this.timeStamp.getDate()
     return (year << 9) + (month << 5) + day
   }
 
-  get timeWord () {
+  get timeWord() {
     const hours = this.timeStamp.getHours()
     const minutes = this.timeStamp.getMinutes()
     const seconds = Math.floor(this.timeStamp.getSeconds() / 2)
@@ -104,7 +113,7 @@ class Entry {
 export default class {
   static #endOfCentralDirectoryRecordLength = 22
 
-  constructor () {
+  constructor() {
     this.entries = []
   }
 
@@ -114,7 +123,7 @@ export default class {
    * @param {Blob} blob data
    * @return {Entry}
    */
-  async addFile (name, blob) {
+  async addFile(name, blob) {
     const file = await Entry.addFile(name, blob)
     this.entries.push(file)
     return file
@@ -125,7 +134,7 @@ export default class {
    * @param {string} name name of folder
    * @return {Entry}
    */
-  addFolder (name) {
+  addFolder(name) {
     const folder = Entry.addFolder(name)
     this.entries.push(folder)
     const scope = {
@@ -134,7 +143,7 @@ export default class {
       },
       addFolder: (childName) => {
         return this.addFolder(`${name}/${childName}`)
-      }
+      },
     }
     return Object.assign(folder, scope)
   }
@@ -143,8 +152,10 @@ export default class {
    * Generate endOfCentralDirectoryRecord
    * @return {ArrayBuffer}
    */
-  endOfCentralDirectoryRecord () {
-    const buffer = new ArrayBuffer(this.constructor.#endOfCentralDirectoryRecordLength)
+  endOfCentralDirectoryRecord() {
+    const buffer = new ArrayBuffer(
+      this.constructor.#endOfCentralDirectoryRecordLength,
+    )
     const dv = new DataView(buffer)
     dv.setUint32(0, 0x06054b50, true) // End of central directory signature
     dv.setUint16(4, 0, true) // Number of this disk
@@ -162,7 +173,7 @@ export default class {
    * @param {boolean} [purge=true] remove compressed data after write
    * @return {Promise} Resolves to zip blob
    */
-  async write (purge = true) {
+  async write(purge = true) {
     const blobs = []
     let totalBytes = 0
     for (const file of this.entries) {

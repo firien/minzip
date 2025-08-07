@@ -1,10 +1,10 @@
-import test from 'node:test'
 import assert from 'node:assert/strict'
-import MinZip from '../../index.js'
-import { writeFileSync } from 'node:fs'
-import { join } from 'node:path'
-import { tmpdir } from 'node:os'
 import { execSync } from 'node:child_process'
+import { writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import test from 'node:test'
+import MinZip from '../../index.js'
 
 test('zip me up', async () => {
   const zip = new MinZip()
